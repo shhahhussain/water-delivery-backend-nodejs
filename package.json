@@ -13,7 +13,9 @@
     "prettier": "npx prettier -c .",
     "db:migrate": "npx sequelize db:migrate",
     "db:migrate:create": "npx sequelize migration:generate --name",
-    "db:migrate:undo": "npx sequelize db:migrate:undo"
+    "db:migrate:undo": "npx sequelize db:migrate:undo",
+    "seed:generate": "npx sequelize-cli seed:generate --name",
+    "db:seed:all": "npx sequelize-cli db:seed:all"
   },
   "repository": {
     "type": "git",

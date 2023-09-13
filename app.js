@@ -2,6 +2,7 @@ const express = require("express");
 const expressLogger = require("express-bunyan-logger");
 const cors = require("cors");
 const router = require("./routes");
+require("./models");
 
 // error handling by
 process.on("uncaughtException", (e) => {
