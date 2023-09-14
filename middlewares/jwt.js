@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config");
+const { Users } = require("../models");
 
 module.exports = {
   getToken: (user) => {
@@ -22,11 +23,23 @@ module.exports = {
         token = token.slice(7, token.length).trimLeft();
       }
 
-      const verified = jwt.verify(token, config.get("jwt.user_secret_key"));
-      req.user = verified;
-      next();
+      jwt.verify(
+        token,
+        config.get("jwt.user_secret_key"),
+        async (err, decoded) => {
+          if (err) {
+            return res.internalError(err);
+          }
+          let user = await Users.findByPk(decoded.id);
+          if (!user) {
+            return res.internalError(new Error("Invalid User"));
+          }
+          req.user = decoded;
+          next();
+        }
+      );
     } catch (error) {
-      res.internalError(error);
+      return res.internalError(error);
     }
   },
 };

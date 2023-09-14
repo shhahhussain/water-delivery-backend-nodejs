@@ -35,7 +35,7 @@ module.exports = {
         is_mobile_verified: false,
       });
 
-      const token = getToken({ id: newUser.id });
+      const token = getToken({ id: newUser.id, email: newUser.email });
 
       res.success({ newUser: newUser, token: token });
     } catch (err) {
