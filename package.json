@@ -13,7 +13,9 @@
     "prettier": "npx prettier -c .",
     "db:migrate": "npx sequelize db:migrate",
     "db:migrate:create": "npx sequelize migration:generate --name",
-    "db:migrate:undo": "npx sequelize db:migrate:undo"
+    "db:migrate:undo": "npx sequelize db:migrate:undo",
+    "seed:generate": "npx sequelize-cli seed:generate --name",
+    "db:seed:all": "npx sequelize-cli db:seed:all"
   },
   "repository": {
     "type": "git",
@@ -23,11 +25,13 @@
   "license": "ISC",
   "homepage": "repo_url#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "bunyan": "^1.8.15",
     "convict-format-with-validator": "^6.2.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-bunyan-logger": "^1.3.3",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",

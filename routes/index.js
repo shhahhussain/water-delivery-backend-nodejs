@@ -5,7 +5,8 @@ const router = Router();
 const userRouter = require("./user");
 const testRuleRouter = require("./test");
 
-router.use("/v1/users", userRouter);
 router.use("/test", testRuleRouter);
+
+router.use("/users", userRouter);
 
 module.exports = router;
