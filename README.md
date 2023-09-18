@@ -1,81 +1,114 @@
-# Basic-App-Structure
+# Registering a User
 
-A template of Node.js Web Server.
+Register a user as an app user.
 
-## Pre requisites
+- **Endpoint URL**: `{{baseURL}}/api/users/signup`
+- **HTTP Method**: POST
+- **Description**: This endpoint allows you to register a new user as an app user.
+- **Request Body**: JSON format
 
-- Node 16.0
+### Request Body
 
-## Install dependencies
-
-```
-npm install or npm i
-```
-
-## Start Server
-
-```
-npm start
-```
-
-Or
-
-```
-node server | bunyan #install bunyan globally for good formatting of logs
+```json
+{
+  "full_name": "Peter Tom",
+  "mobile_number": "03059999999",
+  "no_of_family_members": 8,
+  "gender": "Male",
+  "email": "pp1dddd@example.com",
+  "date_of_birth": "2000-12-17T00:00:00.000Z",
+  "password": "password"
+}
 ```
 
-Or
+- Success Response:
+- **Status Code**: 200 OK
 
-```
-npm run server (hot reloading)
-```
-
-## Tail Logs
-
-```
-npm run logs
-```
-
-## Stop app
-
-```
-npm run stop
-```
-
-## Lint
-
-```
-> npm run lint
-> npm run prettier
-```
-
-## Config
-
-- For development, define required variables in development.json
-- For production, define required variables as environment variable in remote setup.
-
-## Create Migration
-
-```
-npm run db:migrate:create migration-name
+```json
+{
+  "success": true,
+  "error": null,
+  "body": {
+    "newUser": {
+      "is_verified": false,
+      "id": 19,
+      "full_name": "Peter Tom",
+      "email": "yu@example.com",
+      "gender": "Male",
+      "mobile_number": "03159999999",
+      "no_of_family_members": 8,
+      "date_of_birth": "2000-12-17T00:00:00.000Z",
+      "password": "$2b$10$3tYqEgv/ku3pclIJlQET.OdNR0KZeU6s317zd3aBODeuvkWEIDxDS",
+      "updatedAt": "2023-09-18T05:36:35.162Z",
+      "createdAt": "2023-09-18T05:36:35.162Z"
+    },
+    "token": "jwt"
+  }
+}
 ```
 
-## Run Migration
+- Failure Response:
+- **Status Code**: 400 Bad Request or 500 Server Error
 
+```json
+{
+  "success": false,
+  "error": "Validation error",
+  "body": null
+}
 ```
-npm run db:migrate
+
+# User Login
+
+Authenticate a user by logging in.
+
+- **Endpoint URL**: `{{baseURL}}/api/users/login`
+- **HTTP Method**: POST
+- **Description**: This endpoint allows an existing user to log in to their account.
+- **Request Body**: JSON format
+
+### Request Body
+
+```json
+{
+  "mobile_number": "03159999999",
+  "password": "password"
+}
 ```
 
-## Undo Migration
+- Success Response:
+- **Status Code**: 200 OK
 
+```json
+{
+  "success": true,
+  "error": null,
+  "body": {
+    "newUser": {
+      "is_verified": true,
+      "id": 19,
+      "full_name": "Peter Tom",
+      "email": "yu@example.com",
+      "gender": "Male",
+      "mobile_number": "03159999999",
+      "no_of_family_members": 8,
+      "date_of_birth": "2000-12-17T00:00:00.000Z",
+      "password": "$2b$10$3tYqEgv/ku3pclIJlQET.OdNR0KZeU6s317zd3aBODeuvkWEIDxDS",
+      "updatedAt": "2023-09-18T05:36:35.162Z",
+      "createdAt": "2023-09-18T05:36:35.162Z"
+    },
+    "token": "jwt"
+  }
+}
 ```
-npm run db:migrate:undo
+
+- Failure Response:
+- **Status Code**: 401 Unauthorized or 403 Forbidden or 500 Server Error
+
+```json
+{
+  "success": false,
+  "error": "Not Verified",
+  "body": null
+}
 ```
-
-## Contributing
-
-- Every Database Table should have a corresponding Model file in `models` folder
-- We use `Sequelize` as our ORM
-- Use `npx sequelize` to cli for migrations
-- The `controllers` and `routes` folder should exactly mimic each other. All routers in `routes` should have their corresponding `controllers` file/folder
-- All logging should be done using `req.log`. It's a bunyan logger. For model level logging, `req.log` should be passed to underlying layers
