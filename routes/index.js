@@ -6,14 +6,14 @@ const userRouter = require("./user");
 const testRuleRouter = require("./test");
 
 // Controllers
-const controller = require("../controllers/auth");
+const authController = require("../controllers/auth");
 
 //Middlewares
 const { verifyToken } = require("../middlewares/jwt");
 
-router.post("/users/signup", controller.sign_up);
+router.post("/users/signup", authController.signUp);
 
-router.post("/users/login", controller.log_in);
+router.post("/users/login", authController.logIn);
 
 //router.use("/users", userRouter);
 

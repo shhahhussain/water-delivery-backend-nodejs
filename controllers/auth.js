@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const { getToken } = require("../middlewares/jwt");
 
 module.exports = {
-  sign_up: async (req, res) => {
+  signUp: async (req, res) => {
     let {
       full_name,
       email,
@@ -44,7 +44,7 @@ module.exports = {
     }
   },
 
-  log_in: async (req, res) => {
+  logIn: async (req, res) => {
     try {
       let user = await Users.findOne({
         where: { mobile_number: req.body.mobile_number },
