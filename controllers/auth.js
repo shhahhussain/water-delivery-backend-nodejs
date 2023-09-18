@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const { getToken } = require("../middlewares/jwt");
 
 module.exports = {
-  sign_up: async (req, res) => {
+  signUp: async (req, res) => {
     let {
       full_name,
       email,
@@ -40,6 +40,33 @@ module.exports = {
       res.success({ newUser: newUser, token: token });
     } catch (err) {
       console.log(err);
+      res.internalError(err);
+    }
+  },
+
+  logIn: async (req, res) => {
+    try {
+      let user = await Users.findOne({
+        where: { mobile_number: req.body.mobile_number },
+      });
+
+      let check = await bcrypt.compare(req.body.password, user.password);
+
+      if (check) {
+        if (user.is_verified) {
+          const token = getToken({ id: user.id, email: user.email });
+          res.success({ user: user, token: token });
+        } else {
+          let e = new Error("Not Verified");
+          e.status = 403;
+          res.internalError(e);
+        }
+      } else {
+        let e = new Error("Incorrect Password");
+        e.status = 401;
+        res.internalError(e);
+      }
+    } catch (err) {
       res.internalError(err);
     }
   },

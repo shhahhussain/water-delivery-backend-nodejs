@@ -5,8 +5,18 @@ const router = Router();
 const userRouter = require("./user");
 const testRuleRouter = require("./test");
 
-router.use("/test", testRuleRouter);
+// Controllers
+const authController = require("../controllers/auth");
 
-router.use("/users", userRouter);
+//Middlewares
+const { verifyToken } = require("../middlewares/jwt");
+
+router.post("/users/signup", authController.signUp);
+
+router.post("/users/login", authController.logIn);
+
+//router.use("/users", userRouter);
+
+router.use("/test", testRuleRouter);
 
 module.exports = router;
