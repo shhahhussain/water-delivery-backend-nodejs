@@ -4,7 +4,7 @@ const router = Router();
 // Routers
 const userRouter = require("./user");
 const testRuleRouter = require("./test");
-const orderRouter = require("./order");
+const cartRouter = require("./cart");
 
 // Controllers
 const authController = require("../controllers/auth");
@@ -16,9 +16,9 @@ router.post("/users/signup", authController.signUp);
 
 router.post("/users/login", authController.logIn);
 
-//router.use("/users", userRouter);
+router.use("/users", verifyToken, userRouter);
 
-router.use("/orders", verifyToken, orderRouter);
+router.use("/", verifyToken, cartRouter);
 
 router.use("/test", testRuleRouter);
 
