@@ -61,4 +61,17 @@ module.exports = {
       res.internalError(err);
     }
   },
+
+  getUserCart: async (req, res) => {
+    try {
+      let userCart = await CartItems.findAll({
+        where: {
+          user_id: req.user.id,
+        },
+      });
+      res.success({ userCart });
+    } catch (err) {
+      res.internalError(err);
+    }
+  },
 };

@@ -9,4 +9,6 @@ router.post("/cart/:productId", orderController.addToCart);
 
 router.post("/cart", orderController.addMultipleToCart);
 
+router.get("/cart", orderController.getUserCart);
+
 module.exports = router;
