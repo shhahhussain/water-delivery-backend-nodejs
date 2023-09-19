@@ -54,11 +54,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   User.associate = (models) => {
-    // User.hasMany(models.Posts, {
-    //   as: "posts",
-    //   foreignKey: "fk_user_id",
-    //   targetKey: "id",
-    // });
+    User.hasMany(models.CartItems, { foreignKey: "user_id" });
   };
 
   return User;

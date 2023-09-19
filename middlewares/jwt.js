@@ -16,7 +16,7 @@ module.exports = {
       if (!token) {
         let e = new Error("Access Denied");
         e.status = 403;
-        res.internalError(e);
+        return res.internalError(e);
       }
 
       if (token.startsWith("Bearer ")) {
