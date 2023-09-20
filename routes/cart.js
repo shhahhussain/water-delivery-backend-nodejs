@@ -1,17 +1,16 @@
 const { Router } = require("express");
 const router = Router();
 
-// Controllers
 const orderController = require("../controllers/cart");
 
-router.post("/cart", orderController.addMultipleToCart);
+router.post("/", orderController.addMultipleToCart);
 
-router.get("/cart", orderController.getUserCart);
+router.get("/", orderController.getUserCart);
 
-router.post("/cart/:productId", orderController.addToCart);
+router.post("/:productId", orderController.addToCart);
 
-router.put("/cart/:cartItemId", orderController.updateCartItem);
+router.put("/:cartItemId", orderController.updateCartItem);
 
-router.delete("/cart/:cartItemId", orderController.deleteCartItem);
+router.delete("/:cartItemId", orderController.deleteCartItem);
 
 module.exports = router;

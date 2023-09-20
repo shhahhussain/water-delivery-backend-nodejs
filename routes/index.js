@@ -18,7 +18,7 @@ router.post("/users/login", authController.logIn);
 
 router.use("/users", verifyToken, userRouter);
 
-router.use("/", verifyToken, cartRouter);
+router.use("/cart", verifyToken, cartRouter);
 
 router.use("/test", testRuleRouter);
 

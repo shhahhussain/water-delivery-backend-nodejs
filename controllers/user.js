@@ -1,11 +1,4 @@
-const {
-  Users,
-  Products,
-  UserCoupons,
-  CouponBooks,
-  sequelize,
-  Sequelize,
-} = require("../models");
+const { Users, Products, UserCoupons, CouponBooks } = require("../models");
 
 module.exports = {
   getUserCoupons: async (req, res) => {
