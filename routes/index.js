@@ -11,6 +11,7 @@ const promoOfferRouter = require("./promotional_offers");
 const pivacyPolicyRouter = require("./privacy_policy");
 const feedbackRouter = require("./feedbacks");
 const passwordresetRouter = require("./passwordreset");
+const forgotPasswordRouter = require("./forgotpassword");
 
 // Controllers
 const authController = require("../controllers/auth");
@@ -33,5 +34,6 @@ router.use("/promotionaloffer", auth.verifyToken, promoOfferRouter);
 router.use("/pivacypolicy", auth.verifyToken, pivacyPolicyRouter);
 router.use("/feedback", auth.verifyToken, feedbackRouter);
 router.use("/passwordreset", auth.verifyToken, passwordresetRouter);
+router.use("/forgotpassword", forgotPasswordRouter);
 
 module.exports = router;

@@ -16,10 +16,13 @@ module.exports = {
     const { email } = req.body;
     const otp = Math.floor(1000 + (9999 - 1000) * Math.random());
     const userId = req.user.id;
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 5);
     try {
       await VerificationCodes.create({
         otp,
         userId,
+        expiresAt,
       });
       const mailOptions = {
         from: "shhahhussain@gmail.com",
