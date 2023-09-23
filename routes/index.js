@@ -15,7 +15,7 @@ router.post("/users/signup", authController.signUp);
 
 router.post("/users/login", authController.logIn);
 
-//router.use("/users", userRouter);
+router.use("/users", verifyToken, userRouter);
 
 router.use("/test", testRuleRouter);
 
