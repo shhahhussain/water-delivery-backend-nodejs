@@ -9,7 +9,7 @@ router.get("/", orderController.getUserCart);
 
 router.post("/:productId", orderController.addToCart);
 
-router.put("/:cartItemId", orderController.updateCartItem);
+router.patch("/:cartItemId", orderController.updateCartItem);
 
 router.delete("/:cartItemId", orderController.deleteCartItem);
 

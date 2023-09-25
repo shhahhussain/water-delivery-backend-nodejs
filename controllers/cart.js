@@ -2,22 +2,40 @@ const { Users, Products, CartItems, sequelize } = require("../models");
 
 module.exports = {
   addToCart: async (req, res) => {
+    let { quantity } = req.body;
+
+    if (!quantity) {
+      return res.internalError(new Error("quantity is required"));
+    }
+
+    let userCart = await CartItems.findOne({
+      where: {
+        product_id: req.params.productId,
+      },
+    });
+
     try {
-      let cart = await CartItems.create({
-        quantity: req.body.quantity,
-      });
+      if (!userCart) {
+        let cart = await CartItems.create({
+          quantity: req.body.quantity,
+        });
 
-      let product = await Products.findByPk(req.params.productId);
-      if (!product) {
-        await cart.destroy();
-        throw new Error("Product not avaliable");
+        let product = await Products.findByPk(req.params.productId);
+        if (!product) {
+          await cart.destroy();
+          throw new Error("Product not avaliable");
+        }
+        await cart.setProduct(product);
+        let user = await Users.findByPk(req.user.id);
+        await cart.setUser(user);
+
+        await cart.save();
+        res.success({ cart_item: cart });
+      } else {
+        userCart.quantity = quantity;
+        await userCart.save();
+        res.success({ cart_item: userCart });
       }
-      await cart.setProduct(product);
-      let user = await Users.findByPk(req.user.id);
-      await cart.setUser(user);
-
-      await cart.save();
-      res.success({ cart_item: cart });
     } catch (err) {
       res.internalError(err);
     }
@@ -25,38 +43,27 @@ module.exports = {
 
   addMultipleToCart: async (req, res) => {
     try {
-      let cartItems = [];
+      let isValid = true;
 
-      console.log(req.body);
-      req.body.forEach((cartItem) => {
-        cartItems.push(
-          new Promise(async (resolve, reject) => {
-            let cart = await CartItems.create({
-              quantity: cartItem.quantity,
-            });
+      req.body.forEach((item) => {
+        let { quantity, product_id } = item;
+        if (!quantity || !product_id) {
+          isValid = false;
+          return;
+        } else {
+          item.user_id = req.user.id;
+        }
+      });
 
-            let product = await Products.findByPk(cartItem.product_id);
-            if (!product) {
-              await cart.destroy();
-              resolve(null);
-            }
-            await cart.setProduct(product);
-            let user = await Users.findByPk(req.user.id);
-            await cart.setUser(user);
-
-            await cart.save();
-            resolve(cart);
-          })
+      if (!isValid) {
+        return res.internalError(
+          new Error("quantity and product_id are required for all items")
         );
-        console.log(cartItems);
-      });
+      }
 
-      Promise.all(cartItems).then((cart_items) => {
-        var itemsAdded = cart_items.filter((elements) => {
-          return elements !== null;
-        });
-        res.success({ itemsAdded });
-      });
+      let items = await CartItems.bulkCreate(req.body, { upsert: true });
+
+      res.success(items);
     } catch (err) {
       res.internalError(err);
     }
@@ -82,11 +89,17 @@ module.exports = {
   },
 
   updateCartItem: async (req, res) => {
+    let { quantity } = req.body;
+
+    if (!quantity) {
+      return res.internalError(new Error("quantity is required"));
+    }
+
     try {
       let cartItem = await CartItems.findByPk(req.params.cartItemId);
 
       if (cartItem) {
-        cartItem.quantity = req.body.quantity;
+        cartItem.quantity = quantity;
 
         if (cartItem.quantity == 0) {
           await cartItem.destroy();
