@@ -7,29 +7,21 @@ module.exports = {
       const { newPassword, confirmNewPassword } = req.body;
       const user = await Users.findByPk(userid);
       if (!user) {
-        res.internalError({ message: "User not found" });
+        return res.internalError({ message: "User not found" });
       }
 
       if (newPassword !== confirmNewPassword) {
-        res.internalError({
+        return res.internalError({
           message: "Password did not match. kindly enter the same password",
         });
-      } else {
-        try {
-          const salt = await bcrypt.genSalt();
-          const hashedPassword = await bcrypt.hash(newPassword, salt);
-          user.password = hashedPassword;
-          await user.save();
-          res.success({ message: "password updated successfully" });
-        } catch (error) {
-          console.log(error);
-          res.internalError({
-            message: "Error updating password kindly try again!!",
-          });
-        }
       }
+
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      user.password = hashedPassword;
+      await user.save();
+      res.success({ message: "password updated successfully" });
     } catch (error) {
-      console.log(error);
       res.internalError({ message: "Something went wrong" });
     }
   },

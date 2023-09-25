@@ -18,18 +18,19 @@ module.exports = {
     const userId = req.user.id;
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+    const mailOptions = {
+      from: "shhahhussain@gmail.com",
+      to: email,
+      subject: "Login OTP",
+      text: `Your OTP is ${otp}`,
+    };
     try {
       await VerificationCodes.create({
         otp,
         userId,
         expiresAt,
       });
-      const mailOptions = {
-        from: "shhahhussain@gmail.com",
-        to: email,
-        subject: "Login OTP",
-        text: `Your OTP is ${otp}`,
-      };
+
       transport.sendMail(mailOptions, (err, info) => {
         if (err) {
           res.internalError({ message: "Failed to send OTP" });
@@ -38,7 +39,6 @@ module.exports = {
         }
       });
     } catch (error) {
-      console.log(error.message);
       res.internalError({ message: "Failed to generate OTP" });
     }
   },

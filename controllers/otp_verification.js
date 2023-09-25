@@ -3,7 +3,6 @@ const { VerificationCodes, Users } = require("../models");
 module.exports = {
   otpVerification: async (req, res) => {
     try {
-      const { otp } = req.body;
       const userId = req.user.id;
       const user = await Users.findByPk(userId);
       const latestOtp = await VerificationCodes.findOne({
@@ -11,24 +10,30 @@ module.exports = {
         order: [["createdAt", "DESC"]],
       });
 
-      if (latestOtp) {
-        const timeOfOtp = new Date();
-        if (timeOfOtp <= latestOtp.expiresAt) {
-          if (latestOtp.otp === otp) {
-            user.is_verified = true;
-            await latestOtp.destroy();
-            res.success({ message: "OTP matched" });
-          } else {
-            res.internalError({ message: "Wrong OTP" });
-          }
-        } else {
-          res.internalError({ message: "The OTP has been expired" });
-        }
+      if (!latestOtp) {
+        return res.internalError({ message: "No OTP found" });
       }
+
+      const timeOfOtp = new Date();
+
+      if (timeOfOtp > latestOtp.expiresAt) {
+        await latestOtp.destroy();
+        return res.internalError({ message: "The OTP has expired" });
+      }
+
+      if (latestOtp.otp !== req.body.otp) {
+        return res.internalError({ message: "Wrong OTP" });
+      }
+
+      user.is_verified = true;
+      await user.save();
+      await latestOtp.destroy();
+
+      res.success({ message: "OTP matched" });
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       res.internalError({
-        message: "Internal server Error !! Sorry for the inconvenience",
+        message: "Internal server error. Sorry for the inconvenience",
       });
     }
   },

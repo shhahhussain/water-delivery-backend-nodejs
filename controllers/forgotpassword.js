@@ -6,14 +6,15 @@ module.exports = {
     try {
       const { email } = req.body;
       const user = await Users.findOne({ where: { email } });
+
       if (!user) {
-        res.internalError({
+        return res.internalError({
           message: "No Account is associated with the given email",
         });
-      } else {
-        const token = getToken({ id: user.id, email: user.email });
-        res.success({ token: token });
       }
+
+      const token = getToken({ id: user.id, email: user.email });
+      res.success({ token: token });
     } catch (error) {
       res.internalError(error);
     }
