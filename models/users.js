@@ -43,6 +43,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false,
     },
+    profile_image: {
+      type: DataTypes.STRING,
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,

@@ -53,6 +53,32 @@ var config = convict({
       env: "JWT_USER_SECRET_KEY",
     },
   },
+  aws: {
+    s3_access_key: {
+      doc: "Access key for aws",
+      format: String,
+      default: "",
+      env: "AWS_ACCESS_KEY",
+    },
+    s3_secret_key: {
+      doc: "Secret key for aws",
+      format: String,
+      default: "",
+      env: "AWS_SECRET_KEY",
+    },
+    s3_region: {
+      doc: "aws region",
+      format: String,
+      default: "",
+      env: "AWS_REGION",
+    },
+    s3_bucket: {
+      doc: "Bucket name",
+      format: String,
+      default: "",
+      env: "AWS_BUCKET",
+    },
+  },
 });
 
 // Load environment dependent configuration
