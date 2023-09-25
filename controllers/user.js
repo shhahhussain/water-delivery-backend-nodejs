@@ -1,4 +1,5 @@
-const { Users, Products, Favorites } = require("../models");
+
+const { Users, Products, Favorites, UserCoupons, CouponBooks } = require("../models");
 
 module.exports = {
   getUserProfile: async (req, res) => {
@@ -48,19 +49,38 @@ module.exports = {
   getUserFavorites: async (req, res) => {
     try {
       let userFavorites = await Favorites.findAll({
+         where: {
+          user_id: req.user.id,
+        },
+        include: [
+          {
+             model: Products,
+            required: false,
+            attributes: { exclude: ["description", "createdAt", "updatedAt"] },
+             },
+        ],
+      });
+        res.success({ userFavorites });
+    } catch (err) {
+      res.internalError(err);
+    }
+  },
+      
+  getUserCoupons: async (req, res) => {
+    try {
+      let coupons = await UserCoupons.findAll({
+
         where: {
           user_id: req.user.id,
         },
         include: [
           {
-            model: Products,
+            model: CouponBooks,
             required: false,
-            attributes: { exclude: ["description", "createdAt", "updatedAt"] },
           },
         ],
       });
-
-      res.success({ userFavorites });
+      res.success({ coupons });
     } catch (err) {
       res.internalError(err);
     }

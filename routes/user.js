@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 
+
 const { uploadPicture } = require("../middlewares/upload_file");
 const { imageUpload } = require("../middlewares/file_handler");
 
@@ -22,5 +23,8 @@ router.get("/favorites", userController.getUserFavorites);
 router.post("/favorites/:productId", userController.addToFavorites);
 
 router.delete("/favorites/:productId", userController.removeFromFavorites);
+
+router.get("/coupons", userController.getUserCoupons);
+
 
 module.exports = router;

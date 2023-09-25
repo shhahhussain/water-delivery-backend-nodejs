@@ -32,10 +32,29 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Product.associate = (models) => {
+
     Product.hasMany(models.Favorites, {
       foreignKey: "product_id",
       onDelete: "CASCADE",
     });
+
+    Product.hasMany(models.CartItems, {
+      foreignKey: "product_id",
+      onDelete: "CASCADE",
+    });
+
+    Product.hasOne(models.CouponBooks, {
+      foreignKey: "product_id",
+      as: "productID",
+      onDelete: "CASCADE",
+    });
+
+    Product.hasMany(models.CouponBooks, {
+      foreignKey: "applicable_product_id",
+      as: "applicable_productId",
+      onDelete: "CASCADE",
+    });
+
   };
 
   return Product;
