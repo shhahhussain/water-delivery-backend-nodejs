@@ -54,6 +54,9 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   User.associate = (models) => {
+
+    User.hasMany(models.CartItems, { foreignKey: "user_id" });
+
     User.hasMany(models.UserAddresses, {
       as: "addresses",
       foreignKey: "userId",
@@ -74,6 +77,7 @@ module.exports = (sequelize, DataTypes) => {
       as: "privacyPolicy",
       foreignKey: "userId",
     });
+
   };
 
   return User;

@@ -6,6 +6,7 @@ const userRouter = require("./user");
 const authRouter = require("./auth");
 const addressRouter = require("./useraddress");
 const testRuleRouter = require("./test");
+const cartRouter = require("./cart");
 const otpRouter = require("./verificaton_codes");
 const promoOfferRouter = require("./promotional_offers");
 const pivacyPolicyRouter = require("./privacy_policy");
@@ -23,7 +24,9 @@ router.post("/users/signup", authController.signUp);
 
 router.post("/users/login", authController.logIn);
 
-//router.use("/users", userRouter);
+router.use("/users", verifyToken, userRouter);
+
+router.use("/cart", verifyToken, cartRouter);
 
 router.use("/test", testRuleRouter);
 router.use("/test", testRuleRouter);
