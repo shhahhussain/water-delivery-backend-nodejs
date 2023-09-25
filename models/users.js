@@ -54,7 +54,30 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   User.associate = (models) => {
+
     User.hasMany(models.CartItems, { foreignKey: "user_id" });
+
+    User.hasMany(models.UserAddresses, {
+      as: "addresses",
+      foreignKey: "userId",
+    });
+    User.hasMany(models.VerificationCodes, {
+      as: "otp",
+      foreignKey: "userId",
+    });
+    User.hasMany(models.PromotionalOffers, {
+      as: "promotionalOffers",
+      foreignKey: "userId",
+    });
+    User.hasMany(models.UserFeedbacks, {
+      as: "userFeedbacks",
+      foreignKey: "userId",
+    });
+    User.hasOne(models.PrivacyPolicies, {
+      as: "privacyPolicy",
+      foreignKey: "userId",
+    });
+
   };
 
   return User;
