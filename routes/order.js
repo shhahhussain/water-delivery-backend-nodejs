@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const router = Router();
 
-const checkoutController = require("../controllers/checkout");
+const orderController = require("../controllers/order");
 
-router.post("/", checkoutController.applyingdiscountoncheckout);
+router.post("/", orderController.addOrder);
+router.get("/", orderController.getAllOrders);
+router.get("/:id", orderController.getOneOrder);
 
 module.exports = router;
