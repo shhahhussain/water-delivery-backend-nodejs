@@ -19,6 +19,7 @@ module.exports = (sequelize) => {
   );
 
   User_address.associate = (models) => {
+    console.log(models);
     User_address.belongsTo(models.Users, {
       foreignKey: "userId",
     });

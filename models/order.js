@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(5, 2),
         allowNull: true,
       },
-      Delivery: {
+      delivery: {
         type: DataTypes.DECIMAL(4, 2),
         allowNull: true,
       },

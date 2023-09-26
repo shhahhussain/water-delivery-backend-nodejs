@@ -3,6 +3,7 @@ const stripe = require("stripe")(
 );
 const {
   Users,
+  Orders,
   Products,
   CartItems,
   Promotional_offers,
@@ -11,7 +12,7 @@ const {
 } = require("../models");
 
 module.exports = {
-  applyingdiscountoncheckout: async (req, res) => {
+  addOrder: async (req, res) => {
     const t = await sequelize.transaction();
 
     try {
@@ -28,9 +29,11 @@ module.exports = {
           status: 404,
         });
       }
-
+      let subTotal;
+      let delivery;
+      let status;
       const discountPercentage = promotionalOffer.discount;
-      const discountedPrice = (totalPriceOfOrders * discountPercentage) / 100;
+      const discount = (subTotal * discountPercentage) / 100;
 
       const applicableProductId = promotionalOffer.applicableProductId;
       const leafValue = promotionalOffer.leafValue;
@@ -53,14 +56,19 @@ module.exports = {
       let thierPrice = 3;
       let coupanpricededucation = sendleaf * thierPrice;
 
-      let totalpriceofcart =
-        totalPriceOfOrders - discountedPrice - coupanpricededucation;
+      let total = subTotal + delivery - discount - coupanpricededucation;
 
       const session = await stripe.checkout.session.create({
         payment_method_types: ["card"],
         mode: "payment",
       });
-
+      Orders.create({
+        subTotal,
+        delivery,
+        discount,
+        total,
+        status,
+      });
       await t.commit();
       res.success({
         message:
@@ -72,6 +80,31 @@ module.exports = {
     } catch (error) {
       await t.rollback();
       res.internalError({ message: "Something went wrong" });
+    }
+  },
+  getOrders: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const orders = Orders.findAll({ where: { userId } });
+      if (!orders) {
+        return res.internalError({ message: "No order found", status: 404 });
+      }
+      res.success({ orders });
+    } catch (error) {
+      res.internalError({ message: "Error finding orders" });
+    }
+  },
+  getOneOrder: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const orderId = req.param.id;
+      const order = Orders.findOne({ where: { userId, id: orderId } });
+      if (!order) {
+        return res.internalError({ message: "No order found", status: 404 });
+      }
+      res.success({ order });
+    } catch (error) {
+      res.internalError({ message: "Error finding orders" });
     }
   },
 };
