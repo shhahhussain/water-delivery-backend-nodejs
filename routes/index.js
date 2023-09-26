@@ -13,6 +13,7 @@ const pivacyPolicyRouter = require("./privacy_policy");
 const feedbackRouter = require("./feedbacks");
 const passwordresetRouter = require("./passwordreset");
 const forgotPasswordRouter = require("./forgotpassword");
+const checkoutRouter = require("./checkout");
 
 // Controllers
 const authController = require("../controllers/auth");
@@ -28,7 +29,6 @@ router.use("/users", verifyToken, userRouter);
 
 router.use("/cart", verifyToken, cartRouter);
 
-
 router.use("/test", testRuleRouter);
 router.use("/test", testRuleRouter);
 router.use("/address", auth.verifyToken, addressRouter);
@@ -39,5 +39,6 @@ router.use("/pivacypolicy", auth.verifyToken, pivacyPolicyRouter);
 router.use("/feedback", auth.verifyToken, feedbackRouter);
 router.use("/passwordreset", auth.verifyToken, passwordresetRouter);
 router.use("/forgotpassword", forgotPasswordRouter);
+router.use("/order", auth.verifyToken, checkoutRouter);
 
 module.exports = router;

@@ -25,7 +25,7 @@
   "license": "ISC",
   "homepage": "repo_url#readme",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.417.0",
+    "@aws-sdk/client-s3": "^3.418.0",
     "@aws-sdk/lib-storage": "^3.417.0",
     "bcrypt": "^5.1.1",
     "bunyan": "^1.8.15",
@@ -38,8 +38,10 @@
     "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^2.3.3",
+    "nodemailer": "^6.9.5",
     "pm2": "^5.2.2",
-    "sequelize": "^5.22.5"
+    "sequelize": "^5.22.5",
+    "stripe": "^13.7.0"
   },
   "devDependencies": {
     "convict": "^6.2.3",
