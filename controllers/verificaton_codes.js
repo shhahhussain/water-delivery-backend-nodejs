@@ -42,4 +42,6 @@ module.exports = {
       res.internalError({ message: "Failed to generate OTP" });
     }
   },
+
+  transport: transport,
 };

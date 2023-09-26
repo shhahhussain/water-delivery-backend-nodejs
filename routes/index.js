@@ -19,6 +19,7 @@ const authController = require("../controllers/auth");
 
 //Middlewares
 const { verifyToken } = require("../middlewares/jwt");
+const { verifyUser } = require("../middlewares/verify_user");
 
 router.post("/users/signup", authController.signUp);
 
@@ -27,7 +28,6 @@ router.post("/users/login", authController.logIn);
 router.use("/users", verifyToken, userRouter);
 
 router.use("/cart", verifyToken, cartRouter);
-
 
 router.use("/test", testRuleRouter);
 router.use("/test", testRuleRouter);

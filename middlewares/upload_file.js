@@ -20,7 +20,7 @@ module.exports = {
         client: s3Client,
         params: {
           Bucket: config.get("aws.s3_bucket"),
-          Key: `${req.file.filename}`,
+          Key: `${req.user.id}-profile-image`,
           ContentType: req.file.mimetype,
           ACL: "public-read",
           Body: fs.readFileSync(req.file.path),
