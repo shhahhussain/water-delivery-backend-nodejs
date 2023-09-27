@@ -1,24 +1,25 @@
 "use strict";
 
-let table = "user_coupons";
+let table = "promotions";
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert(table, [
       {
-        coupon_book_id: 3,
-        quantity: 3,
-        user_id: 4,
-        avaliable_leaves: 9,
+        discount: 20,
+        promo_code: "HJJ20",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-
       {
-        coupon_book_id: 2,
-        quantity: 3,
-        user_id: 11,
-        avaliable_leaves: 9,
+        discount: 25,
+        promo_code: "HEJ25",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        discount: 75,
+        promo_code: "NEWYEAR24",
         createdAt: new Date(),
         updatedAt: new Date(),
       },

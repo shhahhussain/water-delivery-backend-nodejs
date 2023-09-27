@@ -5,7 +5,10 @@ module.exports = {
     let { quantity } = req.body;
 
     if (!quantity) {
-      return res.internalError(new Error("quantity is required"));
+      return res.internalError({
+        message: "Quantity is required",
+        status: 400,
+      });
     }
 
     let userCart = await CartItems.findOne({
@@ -23,7 +26,10 @@ module.exports = {
         let product = await Products.findByPk(req.params.productId);
         if (!product) {
           await cart.destroy();
-          throw new Error("Product not avaliable");
+          return res.internalError({
+            message: "Product does not exist",
+            status: 400,
+          });
         }
         await cart.setProduct(product);
         let user = await Users.findByPk(req.user.id);
@@ -56,12 +62,13 @@ module.exports = {
       });
 
       if (!isValid) {
-        return res.internalError(
-          new Error("quantity and product_id are required for all items")
-        );
+        return res.internalError({
+          message: "Body missing required fields",
+          status: 400,
+        });
       }
 
-      let items = await CartItems.bulkCreate(req.body, { upsert: true });
+      let items = await CartItems.bulkCreate(req.body);
 
       res.success(items);
     } catch (err) {
@@ -92,7 +99,10 @@ module.exports = {
     let { quantity } = req.body;
 
     if (!quantity) {
-      return res.internalError(new Error("quantity is required"));
+      return res.internalError({
+        message: "Quantity is required",
+        status: 400,
+      });
     }
 
     try {
@@ -109,7 +119,7 @@ module.exports = {
           res.success({ cartItem });
         }
       } else {
-        res.internalError(new Error("Cart Item not found"));
+        res.internalError({ message: "Cart item not found", status: 400 });
       }
     } catch (err) {
       res.internalError(err);
