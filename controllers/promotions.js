@@ -17,7 +17,7 @@ module.exports = {
     try {
       const promotions = await Promotions.findAll();
       res.success({ promotions });
-    } catch (error) {
+    } catch (err) {
       console.log(err);
       res.internalError(err);
     }
