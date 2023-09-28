@@ -4,22 +4,17 @@ module.exports = (sequelize, DataTypes) => {
   const PaymentMethod = sequelize.define(
     table,
     {
-      payment_method: {
+      payment_type: {
         type: DataTypes.STRING,
         allowNull: false,
-      },
-      cvc: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      credit_card_number: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
       },
     },
     {
       timestamps: true,
     }
   );
+  PaymentMethod.associate = (models) => {
+    PaymentMethod.hasMany(models.Orders, { foreignKey: "paymentMethodId" });
+  };
   return PaymentMethod;
 };

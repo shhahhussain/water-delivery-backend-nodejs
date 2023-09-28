@@ -16,7 +16,14 @@ const {
 module.exports = {
   addOrder: async (req, res) => {
     const t = await sequelize.transaction();
-    const { leafsend, coupon_book_id, promocode, delivery, status } = req.body;
+    const {
+      leafsend,
+      coupon_book_id,
+      promocode,
+      delivery,
+      status,
+      paymentMethodId,
+    } = req.body;
     const userId = req.user.id;
     try {
       const [promotionalOffer, selectedCouponBook] = await Promise.all([
@@ -68,6 +75,7 @@ module.exports = {
         discount,
         total,
         status,
+        paymentMethodId,
       });
       try {
         for (const cartItem of cartItems) {
@@ -95,26 +103,39 @@ module.exports = {
   getAllOrders: async (req, res) => {
     try {
       const userId = req.user.id;
-      const orders = Orders.findAll({ where: { userId } });
-      if (!orders) {
-        return res.internalError({ message: "No order found", status: 404 });
+      const page = req.query.page || 1;
+      const orderPerPage = 3;
+      const offset = (page - 1) * orderPerPage;
+      const orders = await Orders.findAll({
+        where: { userId },
+        limit: orderPerPage,
+        offset,
+      });
+      if (!orders || Object.keys(orders).length === 0) {
+        return res.internalError({
+          message: error.message || "No order found",
+          status: 404,
+        });
       }
       res.success({ orders });
     } catch (error) {
-      res.internalError({ message: "Error finding orders" });
+      res.internalError({ message: error.message || "Error finding orders" });
     }
   },
   getOneOrder: async (req, res) => {
     try {
       const userId = req.user.id;
-      const orderId = req.param.id;
-      const order = Orders.findOne({ where: { userId, id: orderId } });
-      if (!order) {
-        return res.internalError({ message: "No order found", status: 404 });
+      const orderId = req.params.id;
+      const order = await Orders.findOne({ where: { userId, id: orderId } });
+      if (!order || Object.keys(order).length === 0) {
+        return res.internalError({
+          message: error.message || "No order found",
+          status: 404,
+        });
       }
       res.success({ order });
     } catch (error) {
-      res.internalError({ message: "Error finding orders" });
+      res.internalError({ message: error.message || "Error finding orders" });
     }
   },
 };

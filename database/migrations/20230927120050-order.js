@@ -21,6 +21,16 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
+      paymentMethodId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "payment_methods",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
       status: {
         type: Sequelize.STRING,
       },
