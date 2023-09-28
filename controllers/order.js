@@ -1,88 +1,98 @@
 const stripe = require("stripe")(
   "sk_test_51Nt38eF3WlU4fAFlINb2leMhLtp3HVqWueKcwUg1TOQNmH33ZO4NwjvDKLdyz9HoVAMPjIyLcMQRjwxtziHXFOOT00eC9Ct2kT"
 );
+
 const {
-  Users,
   Orders,
   Products,
   CartItems,
-  Promotional_offers,
+  PromotionalOffers,
   UserCoupons,
+  CouponBooks,
+  OrderItems,
   sequelize,
 } = require("../models");
 
 module.exports = {
   addOrder: async (req, res) => {
     const t = await sequelize.transaction();
-
+    const { leafsend, coupon_book_id, promocode, delivery, status } = req.body;
+    const userId = req.user.id;
     try {
-      const userId = req.user.id;
-      const promocode = req.body.promocode || null;
+      const [promotionalOffer, selectedCouponBook] = await Promise.all([
+        PromotionalOffers.findOne({ where: { promocode, userId } }),
+        UserCoupons.findOne({
+          where: { coupon_book_id, user_id: userId },
+          include: [{ model: CouponBooks }],
+        }),
+      ]);
 
-      const promotionalOffer = await Promotional_offers.findOne({
-        where: { code: promocode },
-      });
       if (!promotionalOffer) {
-        await t.rollback();
-        return res.badRequest({
-          message: "Invalid discount code",
-          status: 404,
-        });
-      }
-      let subTotal;
-      let delivery;
-      let status;
-      const discountPercentage = promotionalOffer.discount;
-      const discount = (subTotal * discountPercentage) / 100;
-
-      const applicableProductId = promotionalOffer.applicableProductId;
-      const leafValue = promotionalOffer.leafValue;
-
-      const user = await Users.findByPk(userId);
-      if (user.leaves < leafValue) {
-        await t.rollback();
-        return res.badRequest({
-          message: "Not enough leaves to use this coupon",
+        return res.internalError({
+          message:
+            error.message || "There is no promotional offer for the given code",
         });
       }
 
-      user.leaves -= leafValue;
-      await user.save({ transaction: t });
+      if (!selectedCouponBook) {
+        return res.internalError({
+          message: error.message || "Coupan book was not found",
+        });
+      }
 
-      let leaf = 18;
-      let sendleaf = req.body.sendedleaffromuser;
-      let leafremaining = leaf - sendleaf;
-
-      let thierPrice = 3;
-      let coupanpricededucation = sendleaf * thierPrice;
-
-      let total = subTotal + delivery - discount - coupanpricededucation;
-
-      const session = await stripe.checkout.session.create({
-        payment_method_types: ["card"],
-        mode: "payment",
+      const cartItems = await CartItems.findAll({
+        where: { user_id: userId },
+        include: [{ model: Products }],
       });
-      Orders.create({
+
+      let subTotal = 0;
+      for (const cartItem of cartItems) {
+        subTotal += cartItem.product.unit_price * cartItem.quantity;
+      }
+
+      const discount = (subTotal * promotionalOffer.discount) / 100;
+      const newCouponPrice =
+        leafsend * selectedCouponBook.coupon_book.rate_per_leaf;
+      const total = subTotal + delivery - discount - newCouponPrice;
+      const totalAmountInCents = Math.round(subTotal * 100);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmountInCents,
+        currency: "aed",
+      });
+
+      const order = await Orders.create({
+        userId,
         subTotal,
         delivery,
         discount,
         total,
         status,
       });
-      await t.commit();
-      res.success({
-        message:
-          "Your price is " +
-          totalpriceofcart +
-          " total leaf remaining " +
-          leafremaining,
-      });
+      try {
+        for (const cartItem of cartItems) {
+          await OrderItems.create({
+            orderId: order.id,
+            userId: userId,
+            productId: cartItem.product.id,
+            quantity: cartItem.quantity,
+          });
+        }
+      } catch (error) {
+        return res.internalError({
+          message: error.message || "Error Creating Order items",
+        });
+      }
+
+      res.success({ order, paymentIntent });
     } catch (error) {
       await t.rollback();
-      res.internalError({ message: "Something went wrong" });
+      return res.internalError({
+        message: error.message || "An error occurred",
+      });
     }
   },
-  getOrders: async (req, res) => {
+  getAllOrders: async (req, res) => {
     try {
       const userId = req.user.id;
       const orders = Orders.findAll({ where: { userId } });

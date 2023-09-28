@@ -1,15 +1,9 @@
-const table = "promotional_offers";
+const table = "promotionalOffers";
 
 module.exports = (sequelize, DataTypes) => {
   const Promotional_offer = sequelize.define(
     table,
     {
-      userId: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER,
-      },
       discount: {
         type: DataTypes.STRING,
         allowNull: false,
