@@ -1,13 +1,14 @@
 const nodemailer = require("nodemailer");
 const { VerificationCodes } = require("../models");
+const config = require("../config");
+
 const transport = nodemailer.createTransport({
-  service: "gmail",
-  port: 587,
-  secure: false,
-  requireTLS: true,
+  service: config.get("email.service"),
+  port: config.get("email.port"),
+  secure: config.get("email.secure"),
   auth: {
-    user: "shhahhussain@gmail.com",
-    pass: "pdibnqeyxpiesyqk",
+    user: config.get("email.auth.user"),
+    pass: config.get("email.auth.pass"),
   },
 });
 

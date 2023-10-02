@@ -79,6 +79,46 @@ var config = convict({
       env: "AWS_BUCKET",
     },
   },
+  stripeApiKey: {
+    doc: "Stripe API Key",
+    format: String,
+    default: "",
+    env: "STRIPE_API_KEY",
+  },
+  email: {
+    service: {
+      doc: "Email service provider",
+      format: String,
+      default: "gmail",
+      env: "EMAIL_SERVICE",
+    },
+    port: {
+      doc: "Email server port",
+      format: "port",
+      default: 587,
+      env: "EMAIL_PORT",
+    },
+    secure: {
+      doc: "Secure connection",
+      format: Boolean,
+      default: false,
+      env: "EMAIL_SECURE",
+    },
+    auth: {
+      user: {
+        doc: "Email user",
+        format: String,
+        default: "",
+        env: "EMAIL_USER",
+      },
+      pass: {
+        doc: "Email password",
+        format: String,
+        default: "",
+        env: "EMAIL_PASS",
+      },
+    },
+  },
 });
 
 // Load environment dependent configuration
