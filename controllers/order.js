@@ -1,6 +1,7 @@
-const stripe = require("stripe")(
-  "sk_test_51Nt38eF3WlU4fAFlINb2leMhLtp3HVqWueKcwUg1TOQNmH33ZO4NwjvDKLdyz9HoVAMPjIyLcMQRjwxtziHXFOOT00eC9Ct2kT"
-);
+const config = require("../config");
+const stripeApiKey = config.get("stripeApiKey");
+
+const stripe = require("stripe")(stripeApiKey);
 
 const {
   Orders,
@@ -17,36 +18,15 @@ module.exports = {
   addOrder: async (req, res) => {
     const t = await sequelize.transaction();
     const {
-      leafsend,
-      coupon_book_id,
       promocode,
       delivery,
       status,
       paymentMethodId,
+      paymentToken,
     } = req.body;
+
     const userId = req.user.id;
     try {
-      const [promotionalOffer, selectedCouponBook] = await Promise.all([
-        PromotionalOffers.findOne({ where: { promocode, userId } }),
-        UserCoupons.findOne({
-          where: { coupon_book_id, user_id: userId },
-          include: [{ model: CouponBooks }],
-        }),
-      ]);
-
-      if (!promotionalOffer) {
-        return res.internalError({
-          message:
-            error.message || "There is no promotional offer for the given code",
-        });
-      }
-
-      if (!selectedCouponBook) {
-        return res.internalError({
-          message: error.message || "Coupan book was not found",
-        });
-      }
-
       const cartItems = await CartItems.findAll({
         where: { user_id: userId },
         include: [{ model: Products }],
@@ -57,15 +37,51 @@ module.exports = {
         subTotal += cartItem.product.unit_price * cartItem.quantity;
       }
 
-      const discount = (subTotal * promotionalOffer.discount) / 100;
-      const newCouponPrice =
-        leafsend * selectedCouponBook.coupon_book.rate_per_leaf;
-      const total = subTotal + delivery - discount - newCouponPrice;
-      const totalAmountInCents = Math.round(subTotal * 100);
+      let totalCouponDiscount = 0;
+      for (const cartItem of cartItems) {
+        const couponLeafs = req.body.coupon_leafs || [];
 
+        if (couponLeafs.length > 0) {
+          for (const couponLeaf of couponLeafs) {
+            const { coupon_book_id, leafs } = couponLeaf;
+            const selectedCouponBook = await UserCoupons.findOne({
+              where: { coupon_book_id, user_id: userId },
+              include: [{ model: CouponBooks }],
+            });
+
+            if (selectedCouponBook) {
+              if (
+                selectedCouponBook.coupon_book.applicable_product_id ===
+                cartItem.product.id
+              ) {
+                const couponDiscount =
+                  leafs * selectedCouponBook.coupon_book.rate_per_leaf;
+                totalCouponDiscount += couponDiscount;
+
+                let remainingleaf = selectedCouponBook.avaliable_leaves - leafs;
+                selectedCouponBook.avaliable_leaves = remainingleaf;
+                await selectedCouponBook.save();
+              }
+            }
+          }
+        }
+      }
+
+      let discount = 0;
+      if (promocode) {
+        const promotionalOffer = await PromotionalOffers.findOne({
+          where: { promocode, userId },
+        });
+        if (promotionalOffer) {
+          discount = (subTotal * promotionalOffer.discount) / 100;
+        }
+      }
+      const total = subTotal + delivery - discount - totalCouponDiscount;
+      const totalAmountInCents = Math.round(subTotal * 100);
       const paymentIntent = await stripe.paymentIntents.create({
         amount: totalAmountInCents,
         currency: "aed",
+        payment_method: paymentToken,
       });
 
       const order = await Orders.create({
@@ -91,6 +107,8 @@ module.exports = {
           message: error.message || "Error Creating Order items",
         });
       }
+
+      await t.commit();
 
       res.success({ order, paymentIntent });
     } catch (error) {
