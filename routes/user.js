@@ -10,12 +10,12 @@ router.get("/profile", userController.getUserProfile);
 
 router.patch("/profile", userController.updateUserProfile);
 
-router.patch(
-  "/profileImage",
-  imageUpload.single("profileImage"),
-  uploadPicture,
-  userController.setUserProfilePicture
-);
+// router.patch(
+//   "/profileImage",
+//   imageUpload.single("profileImage"),
+//   uploadPicture,
+//   userController.setUserProfilePicture
+// );
 
 router.get("/favorites", userController.getUserFavorites);
 
