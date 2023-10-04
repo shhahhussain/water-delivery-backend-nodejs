@@ -11,18 +11,22 @@ module.exports = {
       }
 
       if (newPassword !== confirmNewPassword) {
-        return res.internalError({
-          message: "Password did not match. kindly enter the same password",
-        });
+        throw {
+          message:
+            error.message ||
+            "Password did not match. kindly enter the same password",
+          status: 400,
+        };
       }
 
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(newPassword, salt);
-      user.password = hashedPassword;
-      await user.save();
+      await user.update({
+        password: hashedPassword,
+      });
       res.success({ message: "password updated successfully" });
     } catch (error) {
-      res.internalError({ message: "Something went wrong" });
+      res.internalError({ message: error.message || "Something went wrong" });
     }
   },
 };

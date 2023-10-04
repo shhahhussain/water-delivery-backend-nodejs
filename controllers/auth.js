@@ -1,7 +1,7 @@
 const { Users, sequelize, VerificationCodes } = require("../models");
 const bcrypt = require("bcrypt");
 const { getToken } = require("../middlewares/jwt");
-const { transport } = require("./verificaton_codes");
+const { transport, getMailOptions } = require("./verificaton_codes");
 
 module.exports = {
   signUp: async (req, res) => {
@@ -61,12 +61,7 @@ module.exports = {
         return res.internalError({ message: "Could not register" });
       }
 
-      const mailOptions = {
-        from: "shhahhussain@gmail.com",
-        to: email,
-        subject: "Verify your Email",
-        text: `Your OTP is ${result.otp}`,
-      };
+      const mailOptions = getMailOptions(email, otp);
 
       transport.sendMail(mailOptions, (err, info) => {
         if (err) {
