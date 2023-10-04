@@ -9,7 +9,7 @@ module.exports = {
       if (!email) {
         return res.internalError({
           message:
-            " No email provided !! Kindly provide an email associated with your account",
+            "No email provided !! Kindly provide an email associated with your account",
           status: 400,
         });
       }

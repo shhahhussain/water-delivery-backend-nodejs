@@ -8,7 +8,6 @@ module.exports = {
     try {
       otpTransaction = await sequelize.transaction();
       const userId = req.user.id;
-      console.log(userId);
       const { email } = req.body;
       const user = await Users.findOne({ where: { id: userId, email } });
       if (!user) {
