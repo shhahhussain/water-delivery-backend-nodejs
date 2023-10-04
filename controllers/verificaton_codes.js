@@ -4,10 +4,13 @@ const { randomOTPgenerator } = require("../utils/otpgenerator");
 
 module.exports = {
   sendOtp: async (req, res) => {
+    let otpTransaction;
     try {
-      const otpTransaction = await sequelize.transaction();
+      otpTransaction = await sequelize.transaction();
+      const userId = req.user.id;
+      console.log(userId);
       const { email } = req.body;
-      const user = await Users.findOne({ where: { email } });
+      const user = await Users.findOne({ where: { id: userId, email } });
       if (!user) {
         return res.internalError({
           message:
@@ -15,7 +18,6 @@ module.exports = {
         });
       }
       const otp = randomOTPgenerator();
-      const userId = req.user.id;
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 5);
 
@@ -53,7 +55,6 @@ module.exports = {
       if (!latestOtp) {
         return res.internalError({ message: "No OTP found" });
       }
-
       const timeOfOtp = new Date();
 
       if (timeOfOtp > latestOtp.expiresAt) {
