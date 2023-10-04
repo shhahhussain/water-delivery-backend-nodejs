@@ -1,33 +1,42 @@
-const config = require("../config");
-const { VerificationCodes, Users } = require("../models");
+const { VerificationCodes, Users, sequelize } = require("../models");
 const { transport, getMailOptions } = require("../utils/emailutils");
 const { randomOTPgenerator } = require("../utils/otpgenerator");
 
 module.exports = {
   sendOtp: async (req, res) => {
     try {
+      const otpTransaction = await sequelize.transaction();
       const { email } = req.body;
+      const user = await Users.findOne({ where: { email } });
+      if (!user) {
+        return res.internalError({
+          message:
+            "No user found with the given email !! Kindly check your email",
+        });
+      }
       const otp = randomOTPgenerator();
       const userId = req.user.id;
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 5);
 
+      const mailOptions = getMailOptions(email, otp);
+      transport.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          res.internalError({ message: "Failed to send OTP" });
+        }
+      });
       await VerificationCodes.create({
         otp,
         userId,
         expiresAt,
       });
-
-      const mailOptions = getMailOptions(email, otp);
-      transport.sendMail(mailOptions, (err, info) => {
-        if (err) {
-          res.internalError({ message: "Failed to send OTP" });
-        } else {
-          res.success({ message: "OTP successfully sent" });
-        }
-      });
+      await otpTransaction.commit();
+      res.success({ message: "OTP successfully sent" });
     } catch (error) {
-      res.internalError({ message: error.message || "Failed to generate OTP" });
+      await otpTransaction.rollback();
+      return res.internalError({
+        message: error.message || "Failed to generate OTP",
+      });
     }
   },
 

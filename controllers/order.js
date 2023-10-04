@@ -51,9 +51,12 @@ const calculateCouponDiscount = async (userId, cartItems, couponLeafs) => {
             totalCouponDiscount += couponDiscount;
 
             let remainingleaf = selectedCouponBook.avaliable_leaves - leafs;
-            await selectedCouponBook.update({
-              avaliable_leaves: remainingleaf,
-            });
+            await selectedCouponBook.update(
+              {
+                avaliable_leaves: remainingleaf,
+              },
+              { transaction: orderTransaction }
+            );
           }
         }
       }
@@ -108,23 +111,29 @@ module.exports = {
         payment_method: paymentToken,
       });
 
-      const order = await Orders.create({
-        userId,
-        subTotal,
-        delivery,
-        discount,
-        total,
-        status,
-        paymentMethodId,
-      });
+      const order = await Orders.create(
+        {
+          userId,
+          subTotal,
+          delivery,
+          discount,
+          total,
+          status,
+          paymentMethodId,
+        },
+        { transaction: orderTransaction }
+      );
 
       for (const cartItem of cartItems) {
-        await OrderItems.create({
-          orderId: order.id,
-          userId: userId,
-          productId: cartItem.product.id,
-          quantity: cartItem.quantity,
-        });
+        await OrderItems.create(
+          {
+            orderId: order.id,
+            userId: userId,
+            productId: cartItem.product.id,
+            quantity: cartItem.quantity,
+          },
+          { transaction: orderTransaction }
+        );
       }
 
       await orderTransaction.commit();
@@ -149,6 +158,7 @@ module.exports = {
         limit: orderPerPage,
         offset,
       });
+
       if (Object.keys(orders).length === 0) {
         return res.internalError({
           message: error.message || "No order found",

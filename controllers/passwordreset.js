@@ -18,8 +18,9 @@ module.exports = {
 
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(newPassword, salt);
-      user.password = hashedPassword;
-      await user.save();
+      await user.update({
+        password: hashedPassword,
+      });
       res.success({ message: "password updated successfully" });
     } catch (error) {
       res.internalError({ message: "Something went wrong" });
