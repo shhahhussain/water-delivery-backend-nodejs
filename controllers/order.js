@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const config = require("../config");
 const stripeApiKey = config.get("stripeApiKey");
 const stripe = require("stripe")(stripeApiKey);
@@ -124,17 +125,16 @@ module.exports = {
         { transaction: orderTransaction }
       );
 
-      for (const cartItem of cartItems) {
-        await OrderItems.create(
-          {
-            orderId: order.id,
-            userId: userId,
-            productId: cartItem.product.id,
-            quantity: cartItem.quantity,
-          },
-          { transaction: orderTransaction }
-        );
-      }
+      const orderItemsToInsert = cartItems.map((cartItem) => ({
+        orderId: order.id,
+        userId: userId,
+        productId: cartItem.product.id,
+        quantity: cartItem.quantity,
+      }));
+
+      await OrderItems.bulkCreate(orderItemsToInsert, {
+        transaction: orderTransaction,
+      });
 
       await orderTransaction.commit();
 
@@ -159,11 +159,11 @@ module.exports = {
         offset,
       });
 
-      if (Object.keys(orders).length === 0) {
-        return res.internalError({
+      if (_.isEmpty(orders)) {
+        throw {
           message: error.message || "No order found",
           status: 404,
-        });
+        };
       }
       res.success({ orders });
     } catch (error) {
@@ -176,11 +176,11 @@ module.exports = {
       const userId = req.user.id;
       const orderId = req.params.id;
       const order = await Orders.findOne({ where: { userId, id: orderId } });
-      if (Object.keys(order).length === 0) {
-        return res.internalError({
+      if (_.isEmpty(order)) {
+        throw {
           message: error.message || "No order found",
           status: 404,
-        });
+        };
       }
       res.success({ order });
     } catch (error) {
