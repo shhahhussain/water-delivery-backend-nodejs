@@ -1,7 +1,16 @@
 const _ = require("lodash");
 const config = require("../config");
 const stripeApiKey = config.get("stripeApiKey");
+const paypalID = config.get("paypal.client_id");
+const paypalSecret = config.get("paypal.client_secret");
 const stripe = require("stripe")(stripeApiKey);
+const paypal = require("@paypal/checkout-server-sdk");
+
+const Environment = paypal.core.SandboxEnvironment;
+const paypalClient = new paypal.core.PayPalHttpClient(
+  new Environment(paypalID, paypalSecret)
+);
+
 const {
   Orders,
   Products,
@@ -78,9 +87,11 @@ module.exports = {
         status,
         paymentMethodId,
         paymentToken,
+        selectedPaymentMethod,
+        paypalAuthorizationToken,
       } = req.body;
 
-      const userId = req.user.id;
+      const userId = 35;
 
       const cartItems = await CartItems.findAll({
         where: { user_id: userId },
@@ -106,11 +117,39 @@ module.exports = {
       const total = subTotal + delivery - discount - totalCouponDiscount;
 
       const totalAmountInCents = Math.round(subTotal * 100);
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalAmountInCents,
-        currency: "aed",
-        payment_method: paymentToken,
-      });
+      let paymentIntent;
+
+      if (selectedPaymentMethod === "stripe") {
+        paymentIntent = await stripe.paymentIntents.create({
+          amount: totalAmountInCents,
+          currency: "aed",
+          payment_method: paymentToken,
+        });
+      }
+      if (selectedPaymentMethod === "paypal") {
+        const totalinUSD = totalAmountInCents / 100;
+        const request = new paypal.orders.OrdersCreateRequest();
+        request.prefer("return=representation");
+
+        request.requestBody({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "USD",
+                value: totalinUSD,
+                breakdown: {
+                  item_total: {
+                    currency_code: "USD",
+                    value: totalinUSD,
+                  },
+                },
+              },
+            },
+          ],
+        });
+        const orderofuser = await paypalClient.execute(request);
+      }
 
       const order = await Orders.create(
         {
@@ -124,7 +163,6 @@ module.exports = {
         },
         { transaction: orderTransaction }
       );
-
       const orderItemsToInsert = cartItems.map((cartItem) => ({
         orderId: order.id,
         userId: userId,
@@ -138,7 +176,11 @@ module.exports = {
 
       await orderTransaction.commit();
 
-      res.success({ order, paymentIntent });
+      if (selectedPaymentMethod === "stripe") {
+        res.success({ order, paymentIntent });
+      } else {
+        res.success({ order, orderofuser });
+      }
     } catch (error) {
       await orderTransaction.rollback();
       return res.internalError({

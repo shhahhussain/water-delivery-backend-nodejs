@@ -119,6 +119,20 @@ var config = convict({
       },
     },
   },
+  paypal: {
+    client_id: {
+      doc: "PayPal Client ID",
+      format: String,
+      default: "",
+      env: "PAYPAL_CLIENT_ID",
+    },
+    client_secret: {
+      doc: "PayPal Client Secret",
+      format: String,
+      default: "",
+      env: "PAYPAL_CLIENT_SECRET",
+    },
+  },
 });
 
 // Load environment dependent configuration

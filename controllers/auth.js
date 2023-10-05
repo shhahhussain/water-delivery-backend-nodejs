@@ -1,7 +1,7 @@
 const { Users, sequelize, VerificationCodes } = require("../models");
 const bcrypt = require("bcrypt");
 const { getToken } = require("../middlewares/jwt");
-const { transport, getMailOptions } = require("./verificaton_codes");
+const { transport, getMailOptions } = require("../utils/emailutils");
 
 module.exports = {
   signUp: async (req, res) => {
@@ -40,7 +40,6 @@ module.exports = {
           { transaction: t }
         );
 
-        const otp = Math.floor(1000 + (9999 - 1000) * Math.random());
         const userId = newUser.id;
         const expiresAt = new Date();
         expiresAt.setMinutes(expiresAt.getMinutes() + 5);
@@ -54,14 +53,14 @@ module.exports = {
           { transaction: t }
         );
 
-        return { id: newUser.id, otp: otp };
+        return { id: newUser.id, otp: otp, email: newUser.email };
       });
 
       if (!result) {
         return res.internalError({ message: "Could not register" });
       }
 
-      const mailOptions = getMailOptions(email, otp);
+      const mailOptions = getMailOptions(result.email, result.otp);
 
       transport.sendMail(mailOptions, (err, info) => {
         if (err) {
