@@ -1,9 +1,13 @@
 const _ = require("lodash");
+const {
+  calculatePromoDiscount,
+  calculateCouponDiscount,
+} = require("../utils/discount");
 const config = require("../config");
 const stripeApiKey = config.get("stripeApiKey");
+const stripe = require("stripe")(stripeApiKey);
 const paypalID = config.get("paypal.client_id");
 const paypalSecret = config.get("paypal.client_secret");
-const stripe = require("stripe")(stripeApiKey);
 const paypal = require("@paypal/checkout-server-sdk");
 
 const Environment = paypal.core.SandboxEnvironment;
@@ -15,66 +19,9 @@ const {
   Orders,
   Products,
   CartItems,
-  PromotionalOffers,
-  UserCoupons,
-  CouponBooks,
   OrderItems,
   sequelize,
 } = require("../models");
-
-const calculatePromoDiscount = async (userId, subTotal, promocode) => {
-  let discount = 0;
-
-  if (promocode) {
-    const promotionalOffer = await PromotionalOffers.findOne({
-      where: { promocode, userId },
-    });
-
-    if (promotionalOffer) {
-      discount = (subTotal * promotionalOffer.discount) / 100;
-    }
-  }
-
-  return discount;
-};
-
-const calculateCouponDiscount = async (userId, cartItems, couponLeafs) => {
-  let totalCouponDiscount = 0;
-
-  for (const cartItem of cartItems) {
-    if (couponLeafs.length > 0) {
-      for (const couponLeaf of couponLeafs) {
-        const { coupon_book_id, leafs } = couponLeaf;
-        const selectedCouponBook = await UserCoupons.findOne({
-          where: { coupon_book_id, user_id: userId },
-          include: [{ model: CouponBooks }],
-        });
-
-        if (selectedCouponBook) {
-          if (
-            selectedCouponBook.coupon_book.applicable_product_id ===
-              cartItem.product.id &&
-            selectedCouponBook.avaliable_leaves > 0
-          ) {
-            const couponDiscount =
-              leafs * selectedCouponBook.coupon_book.rate_per_leaf;
-            totalCouponDiscount += couponDiscount;
-
-            let remainingleaf = selectedCouponBook.avaliable_leaves - leafs;
-            await selectedCouponBook.update(
-              {
-                avaliable_leaves: remainingleaf,
-              },
-              { transaction: orderTransaction }
-            );
-          }
-        }
-      }
-    }
-  }
-
-  return totalCouponDiscount;
-};
 
 module.exports = {
   addOrder: async (req, res) => {
@@ -118,7 +65,7 @@ module.exports = {
 
       const totalAmountInCents = Math.round(subTotal * 100);
       let paymentIntent;
-
+      let orderofuser;
       if (selectedPaymentMethod === "stripe") {
         paymentIntent = await stripe.paymentIntents.create({
           amount: totalAmountInCents,
@@ -148,7 +95,7 @@ module.exports = {
             },
           ],
         });
-        const orderofuser = await paypalClient.execute(request);
+        orderofuser = await paypalClient.execute(request);
       }
 
       const order = await Orders.create(
