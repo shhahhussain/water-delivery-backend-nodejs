@@ -1,11 +1,11 @@
 const { PromotionalOffers, UserCoupons, CouponBooks } = require("../models");
 
-const calculatePromoDiscount = async (userId, subTotal, promocode) => {
+const calculatePromoDiscount = async (subTotal, promocode) => {
   let discount = 0;
 
   if (promocode) {
     const promotionalOffer = await PromotionalOffers.findOne({
-      where: { promocode, userId },
+      where: { promocode },
     });
 
     if (promotionalOffer) {
@@ -39,12 +39,9 @@ const calculateCouponDiscount = async (userId, cartItems, couponLeafs) => {
             totalCouponDiscount += couponDiscount;
 
             let remainingleaf = selectedCouponBook.avaliable_leaves - leafs;
-            await selectedCouponBook.update(
-              {
-                avaliable_leaves: remainingleaf,
-              },
-              { transaction: orderTransaction }
-            );
+            await selectedCouponBook.update({
+              avaliable_leaves: remainingleaf,
+            });
           }
         }
       }

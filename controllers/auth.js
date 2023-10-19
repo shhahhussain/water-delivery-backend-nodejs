@@ -2,6 +2,7 @@ const { Users, sequelize, VerificationCodes } = require("../models");
 const bcrypt = require("bcrypt");
 const { getToken } = require("../middlewares/jwt");
 const { transport, getMailOptions } = require("../utils/emailutils");
+const { randomOTPgenerator } = require("../utils/otpgenerator");
 
 module.exports = {
   signUp: async (req, res) => {
@@ -43,7 +44,7 @@ module.exports = {
         const userId = newUser.id;
         const expiresAt = new Date();
         expiresAt.setMinutes(expiresAt.getMinutes() + 5);
-
+        const otp = randomOTPgenerator();
         await VerificationCodes.create(
           {
             otp,

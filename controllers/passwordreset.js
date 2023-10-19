@@ -12,9 +12,7 @@ module.exports = {
 
       if (newPassword !== confirmNewPassword) {
         throw {
-          message:
-            error.message ||
-            "Password did not match. kindly enter the same password",
+          message: "Password did not match. kindly enter the same password",
           status: 400,
         };
       }

@@ -38,7 +38,7 @@ module.exports = {
         paypalAuthorizationToken,
       } = req.body;
 
-      const userId = 35;
+      const userId = req.user.id;
 
       const cartItems = await CartItems.findAll({
         where: { user_id: userId },
@@ -49,6 +49,7 @@ module.exports = {
       for (const cartItem of cartItems) {
         subTotal += cartItem.product.unit_price * cartItem.quantity;
       }
+      console.log(subTotal);
 
       let totalCouponDiscount = 0;
       const couponLeafs = req.body.coupon_leafs || [];
@@ -57,10 +58,8 @@ module.exports = {
         cartItems,
         couponLeafs
       );
-
       let discount = 0;
-      discount = await calculatePromoDiscount(userId, subTotal, promocode);
-
+      discount = await calculatePromoDiscount(subTotal, promocode);
       const total = subTotal + delivery - discount - totalCouponDiscount;
 
       const totalAmountInCents = Math.round(subTotal * 100);

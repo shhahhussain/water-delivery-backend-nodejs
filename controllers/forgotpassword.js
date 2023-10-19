@@ -9,7 +9,6 @@ module.exports = {
       if (!email) {
         throw {
           message:
-            error.message ||
             "No email provided !! Kindly provide an email associated with your account",
           status: 400,
         };
@@ -18,8 +17,7 @@ module.exports = {
 
       if (!user) {
         throw {
-          message:
-            error.message || "No Account is associated with the given email",
+          message: "No Account is associated with the given email",
           status: 400,
         };
       }

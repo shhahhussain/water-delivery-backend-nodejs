@@ -14,6 +14,7 @@ const feedbackRouter = require("./feedbacks");
 const passwordresetRouter = require("./passwordreset");
 const forgotPasswordRouter = require("./forgotpassword");
 const orderRouter = require("./order");
+const productRouter = require("./peoduct");
 
 // Controllers
 const authController = require("../controllers/auth");
@@ -41,5 +42,6 @@ router.use("/feedback", auth.verifyToken, feedbackRouter);
 router.use("/passwordreset", auth.verifyToken, passwordresetRouter);
 router.use("/forgotpassword", forgotPasswordRouter);
 router.use("/order", auth.verifyToken, orderRouter);
+router.use("/product", productRouter);
 
 module.exports = router;
