@@ -44,9 +44,7 @@
     "otp-generator": "^4.0.1",
     "pm2": "^5.2.2",
     "sequelize": "^5.22.5",
-    "stripe": "^13.7.0",
-        "convict": "^6.2.4",
-
+    "stripe": "^13.7.0"
   },
   "devDependencies": {
     "convict": "^6.2.4",
